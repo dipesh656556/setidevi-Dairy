@@ -1,0 +1,60 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Create Android project, icons and copy the app in
+        run: |
+          npx cap add android
+          npx @capacitor/assets generate --android --iconBackgroundColor '#1b7f3b' --splashBackgroundColor '#1b7f3b'
+          npx cap sync android
+
+      - name: Use the fixed signing key (so updates install over the old app and keep data)
+        run: mkdir -p ~/.android && cp keystore/debug.keystore ~/.android/debug.keystore
+
+      - name: Build APK
+        run: |
+          chmod +x android/gradlew
+          cd android && ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk SetideviDairy.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SetideviDairy-apk
+          path: SetideviDairy.apk
+
+      - name: Publish APK as a download link (Releases → latest)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest SetideviDairy.apk \
+            --title "Setidevi Dairy – latest APK" \
+            --notes "Open this page on your Android phone, tap SetideviDairy.apk to download, then install it."
