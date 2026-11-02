@@ -6,6 +6,10 @@
   render();
   cleanupPhotos();
   notifyWeb();
+  setTimeout(() => cloudSync(), 3000);
+  window.addEventListener('online', () => cloudSync());
+  setInterval(() => cloudSync(), 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') cloudSync(); });
   scheduleReminders();
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
   // Android app (Capacitor): hardware back button

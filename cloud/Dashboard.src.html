@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ne">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setidevi Dairy — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--g:#1b6b3a;--g2:#e7f5ec;--navy:#1b2a7a;--m:#e08a00;--e:#3949ab;--ink:#17201b;--mut:#5d6b63;--line:#dde3df;--bg:#f3f5f2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Mukta','Noto Sans Devanagari',system-ui,sans-serif;font-size:15px}
+header{display:flex;align-items:center;gap:12px;background:#fff;border-bottom:3px solid var(--g);padding:10px 18px;position:sticky;top:0;z-index:5}
+header img{height:46px}header h1{margin:0;font-size:20px;color:var(--navy);line-height:1.1}header small{display:block;color:var(--mut);font-size:13px;font-weight:400}
+header .sp{flex:1}
+main{max-width:1280px;margin:0 auto;padding:16px}
+button,select,input{font:inherit}
+.btn{border:0;border-radius:10px;padding:9px 14px;background:var(--g);color:#fff;font-weight:700;cursor:pointer}.btn.grey{background:#e4e8e6;color:var(--ink)}.btn.small{padding:5px 10px;font-size:13px}.btn.red{background:#b3261e}
+.inp{border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;min-height:42px}
+.card{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0001}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.bar label{display:flex;flex-direction:column;font-size:13px;color:var(--mut);font-weight:600;gap:3px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.kpi{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 3px #0001}
+.kpi>span{display:block;font-size:13px;color:var(--mut);font-weight:600}.kpi b{display:block;font-size:24px;line-height:1.2}.kpi i{font-style:normal;font-size:13px;color:var(--mut)}
+.m{color:var(--m)}.e{color:var(--e)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:12px}
+h2{font-size:18px;margin:0 0 8px;display:flex;align-items:center;gap:10px}h2 .sp{flex:1}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:#eef2ef;font-size:12.5px;position:sticky;top:0}td.n,th.n{text-align:right}
+tfoot td{font-weight:800;background:#f3f6f4}
+tr.click{cursor:pointer}tr.click:hover{background:var(--g2)}
+.tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700}.tag.red{background:#fde7e7;color:#a11}.tag.or{background:#fff1dc;color:#8a4b00}.tag.ok{background:#e3f4e6;color:#1b6b33}.tag.off{background:#eceff1;color:#555}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.tab{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-weight:700;cursor:pointer}.tab.on{border-color:var(--g);background:var(--g2);color:var(--g)}
+#login{max-width:380px;margin:60px auto;text-align:center}#login img{height:110px}#login .inp{width:100%;margin:8px 0}
+.muted{color:var(--mut);font-size:13px}.err{color:#b3261e;font-weight:700}
+.hide{display:none!important}
+canvas{max-height:300px}
+@media print{header .sp~*,.bar,.tabs,.btn{display:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <img src="data:image/png;base64,%%LOGO%%" alt="">
+  <div><h1>श्री सेती देवी दुग्ध उत्पादक सहकारी संस्था लि.<small>Setidevi Dairy · Admin dashboard · एडमिन ड्यासबोर्ड</small></h1></div>
+  <div class="sp"></div>
+  <button class="btn grey small hide" id="refresh">↻ Refresh</button>
+  <button class="btn grey small hide" id="logoutBtn">Log out</button>
+</header>
+<main>
+  <div id="login" class="card">
+    <img src="data:image/png;base64,%%LOGO%%" alt="">
+    <h2 style="justify-content:center" id="lgTitle">Admin login · एडमिन लगइन</h2>
+    <p class="muted" id="lgHelp"></p>
+    <input class="inp" type="password" id="pw" placeholder="Password · पासवर्ड">
+    <input class="inp hide" type="password" id="pw2" placeholder="Password again · फेरि">
+    <button class="btn" style="width:100%" id="lgBtn">Log in</button>
+    <p class="err" id="lgErr"></p>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="card bar">
+      <label>Period · अवधि
+        <select class="inp" id="ptype"><option value="month">Month · महिना</option><option value="fy">Fiscal year · आर्थिक वर्ष</option><option value="range">From – to · देखि–सम्म</option></select></label>
+      <label id="lYear">Year · वर्ष <select class="inp" id="year"></select></label>
+      <label id="lMonth">Month · महिना <select class="inp" id="month"></select></label>
+      <label id="lFrom" class="hide">From (BS) <input class="inp" id="from" placeholder="2083-07-01" size="11"></label>
+      <label id="lTo" class="hide">To (BS) <input class="inp" id="to" placeholder="2083-07-30" size="11"></label>
+      <label>Farmer · किसान <select class="inp" id="farmer"><option value="">All farmers · सबै</option></select></label>
+      <div class="muted" id="loaded"></div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-t="overview">📊 Overview · सारांश</button>
+      <button class="tab" data-t="farmers">🧑‍🌾 By farmer · किसान अनुसार</button>
+      <button class="tab" data-t="daily">📅 Daily · दैनिक</button>
+      <button class="tab" data-t="records">🧾 Milk records · दूध रेकर्ड</button>
+      <button class="tab" data-t="ins">🛡️ Insurance · बीमा</button>
+      <button class="tab" data-t="accounts">⚙️ Accounts · खाता</button>
+    </div>
+
+    <section data-s="overview">
+      <div class="grid2">
+        <div class="card"><h2>🥛 Milk sold per day · दैनिक दूध बिक्री (☀️/🌙)</h2><canvas id="cLiters"></canvas></div>
+        <div class="card"><h2>🧪 Average fat per day · दैनिक औसत फ्याट</h2><canvas id="cFat"></canvas></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>🏆 Top farmers by milk · बढी दूध दिने किसान</h2><canvas id="cTop"></canvas></div>
+        <div class="card"><h2>☀️ Morning vs 🌙 Evening</h2><div class="tw"><table id="tShift"></table></div></div>
+      </div>
+    </section>
+    <section data-s="farmers" class="hide"><div class="card"><h2>🧑‍🌾 By farmer · किसान अनुसार <span class="sp"></span><button class="btn small grey" data-csv="tFarmers">⬇ Excel (CSV)</button></h2><p class="muted">Click a farmer to see only that farmer · किसान थिच्दा उसको मात्र देखिन्छ</p><div class="tw"><table id="tFarmers"></table></div></div></section>
+    <section data-s="daily" class="hide"><div class="card"><h2>📅 Daily · दैनिक <span class="sp"></span><button class="btn small grey" data-csv="tDaily">⬇ Excel (CSV)</button></h2><div class="tw"><table id="tDaily"></table></div></div></section>
+    <section data-s="records" class="hide"><div class="card"><h2>🧾 Milk sales records · दूध बिक्री रेकर्ड <span class="sp"></span><button class="btn small grey" data-csv="tRecords">⬇ Excel (CSV)</button></h2><div class="tw"><table id="tRecords"></table></div></div></section>
+    <section data-s="ins" class="hide"><div class="card"><h2>🛡️ Insurance renewals · बीमा नवीकरण <span class="sp"></span><button class="btn small grey" data-csv="tIns">⬇ Excel (CSV)</button></h2><div class="tw"><table id="tIns"></table></div></div></section>
+    <section data-s="accounts" class="hide">
+      <div class="card"><h2>⚙️ Farmer accounts · किसान खाता</h2><p class="muted">Reset a forgotten PIN, or turn an account off. · बिर्सिएको पिन बदल्न वा खाता बन्द गर्न।</p><div class="tw"><table id="tAcc"></table></div></div>
+      <div class="card"><h2>🔑 Change admin password</h2><div class="bar"><input class="inp" type="password" id="opw" placeholder="Current"><input class="inp" type="password" id="npw" placeholder="New (6+ letters)"><button class="btn" id="chpw">Change</button></div><p class="muted" id="chmsg"></p></div>
+    </section>
+  </div>
+</main>
+<script>
+%%BSJS%%
+</script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+const run = (fn, ...a) => new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(e => no(e))[fn](...a));
+let PW = '', D = null, charts = {};
+const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+const fmt = (n, d = 2) => (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: d });
+const rs = n => 'Rs ' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const bsl = s => { if (!s || !BS.valid(s)) return s || ''; const p = BS.parse(s); return p.d + ' ' + BS.MONTHS.en[p.m - 1] + ' ' + p.y; };
+const isM = r => String(r.shift).toLowerCase().startsWith('m');
+
+/* ---------------- login ---------------- */
+async function initLogin() {
+  try {
+    const st = await run('adminStatus');
+    if (!st.hasPassword) { $('#lgTitle').textContent = 'Create admin password · एडमिन पासवर्ड बनाउनुहोस्'; $('#lgHelp').textContent = 'First time: choose a password (6+ letters). Keep it secret. · पहिलो पटक: पासवर्ड बनाउनुहोस्।'; $('#pw2').classList.remove('hide'); $('#lgBtn').textContent = 'Create · बनाउनुहोस्'; $('#lgBtn').dataset.create = '1'; }
+  } catch (e) { $('#lgErr').textContent = String(e.message || e); }
+}
+$('#lgBtn').onclick = async () => {
+  $('#lgErr').textContent = ''; const pw = $('#pw').value;
+  try {
+    if ($('#lgBtn').dataset.create) { if (pw !== $('#pw2').value) throw new Error('Passwords are different'); await run('adminSetPassword', pw, ''); }
+    await run('adminLogin', pw); PW = pw; try { sessionStorage.setItem('sdpw', pw); } catch (e) {}
+    $('#login').classList.add('hide'); $('#app').classList.remove('hide'); $('#refresh').classList.remove('hide'); $('#logoutBtn').classList.remove('hide');
+    await load();
+  } catch (e) { const m = String(e.message || e); $('#lgErr').textContent = m.includes('WRONG') ? 'Wrong password · पासवर्ड मिलेन' : m.includes('SHORT') ? 'Use at least 6 letters' : m; }
+};
+$('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lgBtn').click(); });
+$('#logoutBtn').onclick = () => { try { sessionStorage.removeItem('sdpw'); } catch (e) {} location.reload(); };
+$('#refresh').onclick = () => load();
+
+/* ---------------- data ---------------- */
+async function load() {
+  $('#loaded').textContent = 'Loading… · लोड हुँदैछ';
+  D = await run('adminData', PW);
+  const sel = $('#farmer'), cur = sel.value;
+  sel.innerHTML = '<option value="">All farmers · सबै</option>' + D.farmers.slice().sort((a, b) => a.name.localeCompare(b.name)).map(f => '<option value="' + esc(f.phone) + '">' + esc(f.name) + ' (' + esc(f.phone) + ')</option>').join('');
+  sel.value = cur;
+  $('#loaded').textContent = D.farmers.length + ' farmers · updated ' + new Date(D.time).toLocaleTimeString();
+  draw();
+}
+function period() {
+  const t = $('#ptype').value, y = +$('#year').value, m = +$('#month').value;
+  if (t === 'month') return { from: BS.monthStart(y, m), to: BS.monthEnd(y, m), label: BS.MONTHS.en[m - 1] + ' ' + y };
+  if (t === 'fy') return { from: BS.fyStart(y), to: BS.fyEnd(y), label: 'FY ' + y + '/' + String(y + 1).slice(-2) };
+  const f = $('#from').value.trim(), to = $('#to').value.trim();
+  return { from: BS.valid(f) ? f : BS.monthStart(y, m), to: BS.valid(to) ? to : BS.today(), label: f + ' – ' + to };
+}
+function sum(list, f) { return r2(list.reduce((a, r) => a + (Number(f(r)) || 0), 0)); }
+function stat(list) { const lt = sum(list, r => r.liters); return { lt, fat: lt ? r2(sum(list, r => r.liters * r.fat) / lt) : 0, amt: sum(list, r => r.amount), n: list.length }; }
+
+function draw() {
+  if (!D) return;
+  const P = period(), fp = $('#farmer').value;
+  const inP = r => r.date >= P.from && r.date <= P.to && (!fp || String(r.phone) === fp);
+  const milk = D.milk.filter(inP), prod = D.prod.filter(inP), feed = D.feed.filter(inP), tx = D.txns.filter(inP);
+  const M = stat(milk.filter(isM)), E = stat(milk.filter(r => !isM(r))), T = stat(milk);
+  const prodL = sum(prod, r => r.liters), feedC = sum(feed, r => r.cost);
+  const recv = sum(tx.filter(r => /milk money/i.test(r.type)), r => r.amount);
+  const sellers = new Set(milk.map(r => String(r.phone))).size;
+  $('#kpis').innerHTML = [
+    ['🥛 Milk sold · दूध बिक्री', fmt(T.lt) + ' L', '<span class="m">☀️ ' + fmt(M.lt) + '</span> · <span class="e">🌙 ' + fmt(E.lt) + '</span>'],
+    ['🧪 Avg fat · औसत फ्याट', fmt(T.fat), '<span class="m">☀️ ' + fmt(M.fat) + '</span> · <span class="e">🌙 ' + fmt(E.fat) + '</span>'],
+    ['💰 Milk amount · रकम', rs(T.amt), 'Received · पाएको: ' + rs(recv)],
+    ['🐄 Milk produced · उत्पादन', fmt(prodL) + ' L', 'Sold ' + (prodL ? Math.round(T.lt / prodL * 100) : 0) + '% of produced'],
+    ['🌾 Feed cost · दाना खर्च', rs(feedC), T.lt ? 'Rs ' + fmt(feedC / T.lt) + ' per liter sold' : ''],
+    ['🧑‍🌾 Farmers · किसान', sellers + ' / ' + D.farmers.length, 'selling in ' + P.label],
+  ].map(k => '<div class="kpi"><span>' + k[0] + '</span><b>' + k[1] + '</b><i>' + k[2] + '</i></div>').join('');
+
+  // daily rows
+  const days = []; for (let d = P.from; d <= P.to && days.length < 400; d = BS.addDays(d, 1)) days.push(d);
+  const byDay = days.map(d => { const l = milk.filter(r => r.date === d); return { d, M: stat(l.filter(isM)), E: stat(l.filter(r => !isM(r))), T: stat(l) }; });
+  const dayRows = byDay.filter(x => x.T.n);
+  tableHTML('#tDaily', ['Date · मिति', '☀️ L', '☀️ Fat', '🌙 L', '🌙 Fat', 'Total L', 'Avg fat', 'Amount'],
+    dayRows.map(x => [bsl(x.d), fmt(x.M.lt), x.M.lt ? fmt(x.M.fat) : '–', fmt(x.E.lt), x.E.lt ? fmt(x.E.fat) : '–', fmt(x.T.lt), fmt(x.T.fat), rs(x.T.amt)]),
+    ['Total', fmt(M.lt), fmt(M.fat), fmt(E.lt), fmt(E.fat), fmt(T.lt), fmt(T.fat), rs(T.amt)], [1, 2, 3, 4, 5, 6, 7]);
+
+  // per farmer
+  const farmers = D.farmers.filter(f => !fp || f.phone === fp).map(f => {
+    const l = milk.filter(r => String(r.phone) === f.phone);
+    return { f, M: stat(l.filter(isM)), E: stat(l.filter(r => !isM(r))), T: stat(l),
+      prod: sum(prod.filter(r => String(r.phone) === f.phone), r => r.liters), feed: sum(feed.filter(r => String(r.phone) === f.phone), r => r.cost),
+      recv: sum(tx.filter(r => String(r.phone) === f.phone && /milk money/i.test(r.type)), r => r.amount) };
+  }).sort((a, b) => b.T.lt - a.T.lt);
+  tableHTML('#tFarmers', ['Farmer · किसान', 'Phone', '☀️ L', '☀️ Fat', '🌙 L', '🌙 Fat', 'Total L', 'Avg fat', 'Amount', 'Received', 'Produced L', 'Feed cost', 'Last upload'],
+    farmers.map(x => [x.f.name, x.f.phone, fmt(x.M.lt), x.M.lt ? fmt(x.M.fat) : '–', fmt(x.E.lt), x.E.lt ? fmt(x.E.fat) : '–', fmt(x.T.lt), x.T.lt ? fmt(x.T.fat) : '–', rs(x.T.amt), rs(x.recv), fmt(x.prod), rs(x.feed), x.f.lastSync ? new Date(x.f.lastSync).toLocaleString('en-GB') : 'never']),
+    ['Total', '', fmt(M.lt), fmt(M.fat), fmt(E.lt), fmt(E.fat), fmt(T.lt), fmt(T.fat), rs(T.amt), rs(recv), fmt(prodL), rs(feedC), ''], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    i => farmers[i].f.phone);
+  $$('#tFarmers tbody tr').forEach(tr => tr.onclick = () => { $('#farmer').value = tr.dataset.k; draw(); window.scrollTo(0, 0); });
+
+  // records
+  const rec = milk.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : isM(a) ? 1 : -1));
+  tableHTML('#tRecords', ['Date · मिति', 'Shift', 'Farmer · किसान', 'Liters', 'Fat', 'Rate', 'Amount', 'Sold to', 'Paid by'],
+    rec.map(r => [bsl(r.date), isM(r) ? '☀️ Morning' : '🌙 Evening', r.farmer, fmt(r.liters), fmt(r.fat), fmt(r.rate), rs(r.amount), r.buyer, r.paid_by]), null, [3, 4, 5, 6]);
+
+  // shift table (overview)
+  tableHTML('#tShift', ['', 'Liters', 'Avg fat', 'Amount', 'Entries'],
+    [['☀️ Morning · बिहान', fmt(M.lt), fmt(M.fat), rs(M.amt), M.n], ['🌙 Evening · बेलुका', fmt(E.lt), fmt(E.fat), rs(E.amt), E.n]], ['Total · जम्मा', fmt(T.lt), fmt(T.fat), rs(T.amt), T.n], [1, 2, 3, 4]);
+
+  // insurance (not tied to the period)
+  const td = BS.today();
+  const ins = D.ins.filter(r => r.renewed !== 'yes' && BS.valid(r.expiry) && (!fp || String(r.phone) === fp))
+    .map(r => ({ r, left: BS.diffDays(td, r.expiry) })).sort((a, b) => a.left - b.left);
+  tableHTML('#tIns', ['Farmer · किसान', 'Phone', 'Insured · बीमा', 'Company', 'Policy', 'Expiry · म्याद', 'Status'],
+    ins.map(x => [x.r.farmer, x.r.phone, x.r.insured, x.r.company, x.r.policy, bsl(x.r.expiry), x.left < 0 ? '<span class="tag red">EXPIRED ' + (-x.left) + ' days</span>' : x.left <= 30 ? '<span class="tag or">' + x.left + ' days left</span>' : '<span class="tag ok">' + x.left + ' days</span>']), null, [], null, true);
+
+  // accounts
+  tableHTML('#tAcc', ['Farmer · किसान', 'Phone', 'Joined', 'Last upload', 'App', 'Status', ''],
+    D.farmers.map(f => [f.name, f.phone, f.created ? new Date(f.created).toLocaleDateString('en-GB') : '', f.lastSync ? new Date(f.lastSync).toLocaleString('en-GB') : 'never', f.version, f.active ? '<span class="tag ok">Active</span>' : '<span class="tag off">Off</span>',
+      '<button class="btn small" data-pin="' + esc(f.phone) + '">Reset PIN</button> <button class="btn small ' + (f.active ? 'red' : '') + '" data-act="' + esc(f.phone) + '" data-on="' + (f.active ? 0 : 1) + '">' + (f.active ? 'Turn off' : 'Turn on') + '</button>']), null, [], null, true);
+  $$('[data-pin]').forEach(b => b.onclick = async () => {
+    const pin = prompt('New 4-digit PIN for ' + b.dataset.pin + ' · नयाँ ४ अंकको पिन'); if (!pin) return;
+    if (!/^\d{4}$/.test(pin)) return alert('PIN must be 4 digits');
+    try { await run('adminResetPin', PW, b.dataset.pin, pin); alert('PIN changed. Tell the farmer the new PIN; they must log in again.'); } catch (e) { alert(e.message || e); }
+  });
+  $$('[data-act]').forEach(b => b.onclick = async () => { try { await run('adminSetActive', PW, b.dataset.act, b.dataset.on === '1'); await load(); } catch (e) { alert(e.message || e); } });
+
+  // charts
+  const labels = dayRows.map(x => BS.parse(x.d).d + ' ' + BS.MONTHS.en[BS.parse(x.d).m - 1].slice(0, 3));
+  chart('cLiters', 'bar', labels, [{ label: '☀️ Morning', data: dayRows.map(x => x.M.lt), backgroundColor: '#f2a93b', stack: 's' }, { label: '🌙 Evening', data: dayRows.map(x => x.E.lt), backgroundColor: '#3949ab', stack: 's' }], { scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Liters' } } } });
+  chart('cFat', 'line', labels, [{ label: '☀️ Morning fat', data: dayRows.map(x => x.M.lt ? x.M.fat : null), borderColor: '#e08a00', backgroundColor: '#e08a00', spanGaps: true, tension: .3 }, { label: '🌙 Evening fat', data: dayRows.map(x => x.E.lt ? x.E.fat : null), borderColor: '#3949ab', backgroundColor: '#3949ab', spanGaps: true, tension: .3 }], { scales: { y: { title: { display: true, text: 'Fat %' } } } });
+  const top = farmers.filter(x => x.T.lt).slice(0, 10);
+  chart('cTop', 'bar', top.map(x => x.f.name), [{ label: '☀️ Morning', data: top.map(x => x.M.lt), backgroundColor: '#f2a93b', stack: 's' }, { label: '🌙 Evening', data: top.map(x => x.E.lt), backgroundColor: '#3949ab', stack: 's' }], { indexAxis: 'y', scales: { x: { stacked: true }, y: { stacked: true } } });
+}
+function tableHTML(sel, head, rows, foot, numCols = [], key, raw) {
+  const N = new Set(numCols); const cell = (v, i, tag) => '<' + tag + (N.has(i) ? ' class="n"' : '') + '>' + (raw ? String(v ?? '') : esc(v)) + '</' + tag + '>';
+  $(sel).innerHTML = '<thead><tr>' + head.map((h, i) => cell(h, i, 'th')).join('') + '</tr></thead><tbody>' +
+    (rows.length ? rows.map((r, ri) => '<tr' + (key ? ' class="click" data-k="' + esc(key(ri)) + '"' : '') + '>' + r.map((v, i) => cell(v, i, 'td')).join('') + '</tr>').join('') : '<tr><td colspan="' + head.length + '" class="muted">No records · रेकर्ड छैन</td></tr>') +
+    '</tbody>' + (foot ? '<tfoot><tr>' + foot.map((v, i) => cell(v, i, 'td')).join('') + '</tr></tfoot>' : '');
+}
+function chart(id, type, labels, datasets, extra) {
+  if (typeof Chart === 'undefined') return;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), { type, data: { labels, datasets }, options: Object.assign({ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }, extra) });
+  document.getElementById(id).parentElement.style.height = '320px';
+}
+/* CSV export (opens in Excel) */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-csv]'); if (!b) return;
+  const t = document.getElementById(b.dataset.csv);
+  const csv = Array.from(t.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(c => '"' + c.innerText.replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' }));
+  a.download = b.dataset.csv.slice(1) + '-' + period().label.replace(/\W+/g, '-') + '.csv'; a.click();
+});
+/* tabs & filters */
+$$('.tab').forEach(b => b.onclick = () => { $$('.tab').forEach(x => x.classList.toggle('on', x === b)); $$('section').forEach(s => s.classList.toggle('hide', s.dataset.s !== b.dataset.t)); draw(); });
+['ptype', 'year', 'month', 'from', 'to', 'farmer'].forEach(id => $('#' + id).addEventListener('change', () => {
+  const t = $('#ptype').value; $('#lMonth').classList.toggle('hide', t !== 'month'); $('#lYear').classList.toggle('hide', t === 'range');
+  $('#lFrom').classList.toggle('hide', t !== 'range'); $('#lTo').classList.toggle('hide', t !== 'range'); draw();
+}));
+$('#chpw').onclick = async () => { try { await run('adminSetPassword', $('#npw').value, $('#opw').value); PW = $('#npw').value; $('#chmsg').textContent = 'Password changed ✔'; } catch (e) { $('#chmsg').textContent = String(e.message || e); } };
+(function init() {
+  const td = BS.parse(BS.today());
+  for (let y = BS.START; y < BS.END; y++) $('#year').insertAdjacentHTML('beforeend', '<option value="' + y + '"' + (y === td.y ? ' selected' : '') + '>' + y + '</option>');
+  BS.MONTHS.en.forEach((n, i) => $('#month').insertAdjacentHTML('beforeend', '<option value="' + (i + 1) + '"' + (i + 1 === td.m ? ' selected' : '') + '>' + n + ' · ' + BS.MONTHS.ne[i] + '</option>'));
+  initLogin();
+  let saved = ''; try { saved = sessionStorage.getItem('sdpw') || ''; } catch (e) {}
+  if (saved) { $('#pw').value = saved; $('#lgBtn').click(); }
+})();
+</script>
+</body>
+</html>

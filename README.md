@@ -17,6 +17,7 @@ Works fully **offline**, in **Nepali and English**, with big picture buttons so 
 | 🛡️ Insurance | Policy, company, start/expiry dates (BS), premium, photo of the policy. Red/orange warning on the home screen 30 days before expiry, phone notifications 30, 7 and 1 day before, and a one-tap **Renew**. |
 | 📊 Reports | Daily summary, monthly milk summary, milk by animal, feed cost per animal and per liter, milk money receivable, cash book, ledger. |
 | 📒 Accounts | Real double-entry accounts made automatically from every record: **Trial Balance, Income Statement (Profit & Loss), Balance Sheet** by Nepali fiscal year (Shrawan–Ashadh), with opening balances. |
+| ☁️ Online | Optional: farmers log in with phone number + 4-digit PIN; records upload automatically to the cooperative's Google Sheet whenever there is internet (the app still works offline). Logging in on a new phone brings all records back. Admin web dashboard shows every farmer's morning/evening milk and fat, amounts, charts, insurance due, and lets the admin reset PINs. Setup: `cloud/SETUP-GUIDE.md`. |
 | 💾 Backup | Save all data (including photos) to one file and restore it on any phone. |
 | 🔤 Language | Nepali (with Nepali digits) or English, switch any time. |
 

@@ -2,7 +2,7 @@
 /* ========== Core: state, storage, formatting, widgets, accounting ========== */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.6.0';
 
 const DEFAULT_STATE = () => ({
   v: 1,
@@ -105,7 +105,7 @@ async function loadState() {
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
 }
 let saveTimer = null;
-function persist() { clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.put('kv', 'state', JSON.parse(JSON.stringify(S))), 50); }
+function persist() { clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.put('kv', 'state', JSON.parse(JSON.stringify(S))), 50); if (typeof scheduleSync === 'function' && !syncing) scheduleSync(); }
 function flush() { clearTimeout(saveTimer); return DB.put('kv', 'state', JSON.parse(JSON.stringify(S))); }
 
 /* ---------- photos ---------- */

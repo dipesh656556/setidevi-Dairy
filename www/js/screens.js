@@ -95,7 +95,7 @@ R.home = () => {
       (coop ? '<div><span>🥛 ' + t('todayMilk') + '</span><b>' + ltr(tm.lt) + '</b></div><div><span>' + t('todayAmt') + '</span><b>' + money(tm.amt) + '</b></div>'
         : '<div><span>🥛 ' + t('produced') + '</span><b>' + ltr(prod) + '</b></div><div><span>🏪 ' + t('sold') + '</span><b>' + ltr(tm.lt) + '</b></div>') +
       '<div><span>💵 ' + t('cashBal') + '</span><b>' + money(b.cash || 0) + '</b></div></div>' +
-      '<div class="tiles">' + tiles.join('') + '</div>',
+      cloudBadge() + '<div class="tiles">' + tiles.join('') + '</div>',
   };
 };
 
@@ -572,7 +572,7 @@ R.settings = () => {
       txtIn('name', t('yourName'), st.name) + (st.mode === 'coop' ? rateFields('buy', st) : '') + rateFields('sell', st) +
       '<p class="help">💡 ' + t('rateHelp') + '</p><p class="help">🔄 ' + t('rateNote') + '</p><label class="check"><input type="checkbox" name="big" ' + (st.big ? 'checked' : '') + '> 🔠 ' + t('bigText') + '</label>' +
       '<button class="btn big green" id="sv">✔ ' + t('save') + '</button></form>' +
-      '<a class="btn big blue" href="#/opening">📒 ' + t('openingBal') + '</a>' +
+      '<a class="btn big green" href="#/cloud">☁️ ' + t('online') + '</a>' + '<a class="btn big blue" href="#/opening">📒 ' + t('openingBal') + '</a>' +
       '<div class="card"><p class="help">💾 ' + t('backupTip') + '</p><button class="btn big green" id="bk">💾 ' + t('backup') + '</button><button class="btn blue" id="rs">📂 ' + t('restore') + '</button></div>' +
       '<button class="btn blue" id="rem">🔔 ' + t('remindOn') + '</button>' +
       '<button class="btn red" id="reset">⚠️ ' + t('resetAll') + '</button><p class="help center">' + t('appName') + ' v' + APP_VERSION + ' · ' + t('about') + '</p>',

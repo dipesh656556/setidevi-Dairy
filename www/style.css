@@ -114,3 +114,6 @@ select.inp{font-size:1.05rem}
 .logo img{height:150px;width:auto}
 .hlogo{height:38px;width:38px;object-fit:contain;background:#fff;border-radius:50%;padding:3px;vertical-align:middle;margin-right:8px}
 header.top h1{display:flex;align-items:center;justify-content:center}
+.cloudbadge{display:block;text-align:center;border-radius:12px;padding:10px;margin:8px 0;font-weight:700}.cloudbadge.ok{background:#e3f4e6;color:#1b6b33}.cloudbadge.wait{background:#fff4e0;color:#8a4b00}.cloudbadge.err{background:#fde7e7;color:#a11}.cloudbadge.off{background:#eceff1;color:#37474f}
+.pin{letter-spacing:.5em}
+details summary{cursor:pointer}
