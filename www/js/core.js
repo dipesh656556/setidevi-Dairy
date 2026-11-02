@@ -2,7 +2,7 @@
 /* ========== Core: state, storage, formatting, widgets, accounting ========== */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 
 const DEFAULT_STATE = () => ({
   v: 1,
@@ -306,7 +306,7 @@ function journal() {
   const push = (date, dr, cr, amt, desc, ref) => { amt = r2(+amt || 0); if (amt > 0) J.push({ date, dr, cr, amt, desc, ref }); };
   S.milk.forEach(e => {
     if (e.kind === 'buy') push(e.date, 'milkPurchase', 'farmerPay', e.amount, t('collected') + ': ' + farmerName(e.farmerId) + ' ' + ltr(e.liters), e.id);
-    else push(e.date, e.method === 'credit' || !e.method ? 'recv' : M(e.method), 'milkSales', e.amount, t('sold') + ': ' + (e.buyer || '') + ' ' + ltr(e.liters), e.id);
+    else push(e.date, e.method === 'credit' || !e.method ? 'recv' : M(e.method), 'milkSales', e.amount, t('sold') + ' ' + shiftIcon(e.shift) + ' ' + (e.shift === 'e' ? t('evening') : t('morning')) + ': ' + ltr(e.liters) + ', ' + t('fat') + ' ' + num(e.fat) + (e.buyer ? ' — ' + e.buyer : ''), e.id);
   });
   S.feed.forEach(e => push(e.date, 'feed', e.method === 'credit' ? 'payable' : M(e.method), e.cost, t('tFeed') + ': ' + (e.item || '') + ' — ' + animalName(e.animalId), e.id));
   S.txns.forEach(e => {
@@ -373,3 +373,21 @@ async function saveFile(name, content, mime) {
   toast(t('saved'));
 }
 const isNative = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+/* ---------- morning / evening summaries (used by reports) ---------- */
+function shiftStats(from, to) {
+  const out = {};
+  ['m', 'e'].forEach(sh => {
+    const prod = r2(S.prod.filter(p => p.shift === sh && inRange(p.date, from, to)).reduce((a, p) => a + (+p.liters || 0), 0));
+    out[sh] = { prod, sold: milkSum(S.milk.filter(x => x.kind === 'sell' && x.shift === sh && inRange(x.date, from, to))) };
+  });
+  const all = milkSum(S.milk.filter(x => x.kind === 'sell' && inRange(x.date, from, to)));
+  out.t = { prod: r2(out.m.prod + out.e.prod), sold: all };
+  return out;
+}
+function shiftTable(from, to) {
+  const st = shiftStats(from, to);
+  const row = (label, r, cls) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + label + '</td><td class="n">' + num(r.prod) + '</td><td class="n">' + num(r.sold.lt) + '</td><td class="n">' + (r.sold.lt ? num(r.sold.fat) : '—') + '</td><td class="n">' + money(r.sold.amt, false) + '</td></tr>';
+  return '<table class="tbl"><thead><tr><th>' + t('shift') + '</th><th class="n">' + t('produced') + ' (' + t('ltr') + ')</th><th class="n">' + t('sold') + ' (' + t('ltr') + ')</th><th class="n">' + t('avgFat') + '</th><th class="n">' + t('amount') + '</th></tr></thead><tbody>' +
+    row('☀️ ' + t('morning'), st.m) + row('🌙 ' + t('evening'), st.e) + '</tbody><tfoot>' + row(t('total'), st.t) + '</tfoot></table>';
+}

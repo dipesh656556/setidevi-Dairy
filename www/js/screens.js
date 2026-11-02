@@ -225,12 +225,17 @@ R.day = q => {
   const feed = S.feed.filter(e => e.date === d);
   const tx = S.txns.filter(e => e.date === d);
   let h = '<div class="daynav"><a class="btn grey" href="#/day?date=' + BS.addDays(d, -1) + '">◀</a><div><b>' + bsLabel(d, true) + '</b><small>' + adLabel(d) + '</small></div><a class="btn grey" href="#/day?date=' + BS.addDays(d, 1) + '">▶</a></div>';
+  if (!coop) h += '<h3>📊 ' + t('shiftSummary') + '</h3>' + shiftTable(d, d);
   if (coop) {
     ['m', 'e'].forEach(sh => { const l = buys.filter(e => e.shift === sh); h += '<h3>' + shiftIcon(sh) + ' ' + t('collected') + ' — ' + (sh === 'm' ? t('morning') : t('evening')) + '</h3>' + milkTable(l, 'buy'); });
     h += '<a class="btn big green" href="#/collect?date=' + d + '">➕ ' + t('tCollect') + '</a>';
   } else {
     const ps = r2(prod.reduce((a, e) => a + e.liters, 0));
-    h += '<h3>🥛 ' + t('produced') + ': ' + ltr(ps) + '</h3>' + (prod.length ? '<table class="tbl"><tbody>' + prod.map(p => '<tr><td>' + shiftIcon(p.shift) + '</td><td>' + esc(animalName(p.animalId)) + '</td><td>' + ltr(p.liters) + '</td></tr>').join('') + '</tbody></table>' : empty()) +
+    h += '<h3>🥛 ' + t('produced') + ': ' + ltr(ps) + '</h3>' + (prod.length ? '<table class="tbl"><tbody>' + ['m', 'e'].map(sh => {
+      const l = prod.filter(p => p.shift === sh); if (!l.length) return '';
+      return l.map(p => '<tr><td>' + shiftIcon(p.shift) + '</td><td>' + esc(animalName(p.animalId)) + '</td><td class="n">' + ltr(p.liters) + '</td></tr>').join('') +
+        '<tr class="tot"><td>' + shiftIcon(sh) + '</td><td>' + (sh === 'm' ? t('morning') : t('evening')) + ' ' + t('total') + '</td><td class="n">' + ltr(l.reduce((a, p) => a + p.liters, 0)) + '</td></tr>';
+    }).join('') + '</tbody></table>' : empty()) +
       '<div class="row2"><a class="btn green" href="#/prod?date=' + d + '&shift=m">☀️ ' + t('morning') + '</a><a class="btn green" href="#/prod?date=' + d + '&shift=e">🌙 ' + t('evening') + '</a></div>';
   }
   h += '<h3>🚚 ' + t('sold') + '</h3>' + milkTable(sells, 'sell') + '<a class="btn blue" href="#/sell?date=' + d + '">➕ ' + t('tSell') + '</a>';

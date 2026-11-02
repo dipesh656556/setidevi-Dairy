@@ -8,7 +8,7 @@ R.reports = () => {
     html: '<h3>🥛 ' + t('liters') + '</h3>' +
       b('#/day', '📆', t('rDay')) + b('#/rmonth', '🗓️', t('rMilkMonth')) +
       (coop ? b('#/rsheet', '📋', t('rMonthSheet')) + b('#/rstmt', '🧑‍🌾', t('rFarmerStmt'))
-        : b('#/ranimal', '🐄', t('rAnimal')) + b('#/rfeed', '🌾', t('rFeedAnimal')) + b('#/rledger?acc=recv', '🧾', accName('recv'))) +
+        : b('#/rsales', '🧾', t('rSales')) + b('#/ranimal', '🐄', t('rAnimal')) + b('#/rfeed', '🌾', t('rFeedAnimal')) + b('#/rledger?acc=recv', '📒', accName('recv'))) +
       '<h3>📒 ' + t('tAccounts') + '</h3>' +
       b('#/rcash', '💵', t('rCash')) + b('#/rledger', '📖', t('rLedger')) + b('#/rtb', '⚖️', t('rTB')) + b('#/ris', '📈', t('rIS')) + b('#/rbs', '🏛️', t('rBS')),
   };
@@ -62,21 +62,44 @@ document.addEventListener('click', e => {
 const N = v => '<td class="n">' + v + '</td>';
 const TH = v => '<th class="n">' + v + '</th>';
 
-/* ---- monthly milk summary ---- */
+/* ---- monthly milk summary: each day split into morning / evening ---- */
 R.rmonth = q => {
-  const c = monthCtl(q, 'rmonth'); const coop = isCoop(); const rows = []; const tot = { a: 0, b: 0, c: 0, d: 0 };
+  const c = monthCtl(q, 'rmonth'); const coop = isCoop(); const rows = [];
   for (let d = 1; d <= BS.dim(c.y, c.m); d++) {
     const s = BS.str(c.y, c.m, d);
-    const inL = coop ? milkSum(S.milk.filter(e => e.kind === 'buy' && e.date === s)) : { lt: r2(S.prod.filter(e => e.date === s).reduce((a, e) => a + e.liters, 0)), amt: 0 };
-    const out = milkSum(S.milk.filter(e => e.kind === 'sell' && e.date === s));
-    if (!inL.lt && !out.lt) continue;
-    tot.a += inL.lt; tot.b += inL.amt; tot.c += out.lt; tot.d += out.amt;
-    rows.push('<tr class="tap" onclick="go(\'#/day?date=' + s + '\')"><td>' + nd(d) + '</td>' + N(num(inL.lt)) + (coop ? N(money(inL.amt, false)) : '') + N(num(out.lt)) + N(money(out.amt, false)) + '</tr>');
+    const per = ['m', 'e'].map(sh => {
+      const inL = coop ? milkSum(S.milk.filter(e => e.kind === 'buy' && e.date === s && e.shift === sh)).lt
+        : r2(S.prod.filter(e => e.date === s && e.shift === sh).reduce((a, e) => a + e.liters, 0));
+      return { sh, inL, out: milkSum(S.milk.filter(e => e.kind === 'sell' && e.date === s && e.shift === sh)) };
+    });
+    if (!per.some(x => x.inL || x.out.lt)) continue;
+    per.forEach((x, i) => rows.push('<tr class="tap" onclick="go(\'#/day?date=' + s + '\')">' + (i === 0 ? '<td rowspan="2"><b>' + nd(d) + '</b></td>' : '') +
+      '<td>' + shiftIcon(x.sh) + '</td>' + N(x.inL ? num(x.inL) : '–') + N(x.out.lt ? num(x.out.lt) : '–') + N(x.out.lt ? num(x.out.fat) : '–') + N(x.out.amt ? money(x.out.amt, false) : '–') + '</tr>'));
   }
-  const head = '<tr><th>' + t('date') + '</th>' + TH((coop ? t('collected') : t('produced')) + ' ' + t('ltr')) + (coop ? TH(t('rs')) : '') + TH(t('sold') + ' ' + t('ltr')) + TH(t('sold') + ' ' + t('rs')) + '</tr>';
-  const body = rows.length ? '<table class="tbl"><thead>' + head + '</thead><tbody>' + rows.join('') + '</tbody><tfoot><tr><td>' + t('total') + '</td>' + N(num(tot.a)) + (coop ? N(money(tot.b, false)) : '') + N(num(tot.c)) + N(money(tot.d, false)) + '</tr></tfoot></table>' +
-    (coop ? '<div class="amtbox"><span>' + t('sold') + ' − ' + t('collected') + '</span><b>' + money(tot.d - tot.b) + '</b></div>' : '') : empty();
+  const st = shiftStats(c.from, c.to);
+  const foot = (label, r) => '<tr><td colspan="2">' + label + '</td>' + N(num(r.prod)) + N(num(r.sold.lt)) + N(r.sold.lt ? num(r.sold.fat) : '–') + N(money(r.sold.amt, false)) + '</tr>';
+  const head = '<tr><th>' + t('date') + '</th><th>' + t('shift') + '</th>' + TH((coop ? t('collected') : t('produced')) + ' ' + t('ltr')) + TH(t('sold') + ' ' + t('ltr')) + TH(t('fat')) + TH(t('amount')) + '</tr>';
+  const body = rows.length ? '<table class="tbl"><thead>' + head + '</thead><tbody>' + rows.join('') + '</tbody><tfoot>' +
+    foot('☀️ ' + t('morning') + ' ' + t('total'), st.m) + foot('🌙 ' + t('evening') + ' ' + t('total'), st.e) + foot(t('total'), st.t) + '</tfoot></table>' : empty();
   return { title: t('rMilkMonth'), html: c.html + repWrap(t('rMilkMonth'), monthLabel(c.y, c.m), body) };
+};
+
+/* ---- milk sales statement: every sale with shift, liters, fat, rate; money received; balance ---- */
+R.rsales = q => {
+  const c = rangeCtl(q, 'rsales');
+  const sells = S.milk.filter(e => e.kind === 'sell' && inRange(e.date, c.from, c.to)).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.shift === 'm' ? -1 : 1));
+  const recv = S.txns.filter(e => e.type === 'milkRecv' && inRange(e.date, c.from, c.to)).sort(sortDate);
+  const st = shiftStats(c.from, c.to);
+  const sd = x => { const { m, d } = BS.parse(x); return nd(d) + ' ' + BS.MONTHS[lang()][m - 1]; };
+  const rows = sells.map(e => '<tr><td style="white-space:nowrap">' + sd(e.date) + '</td><td>' + shiftIcon(e.shift) + '</td>' + N(num(e.liters)) + N(num(e.fat)) + N(num(e.rate)) + N(money(e.amount, false)) + '</tr>').join('');
+  const foot = (label, r) => '<tr><td colspan="2">' + label + '</td>' + N(num(r.sold.lt)) + N(r.sold.lt ? num(r.sold.fat) : '–') + N('') + N(money(r.sold.amt, false)) + '</tr>';
+  const recvTot = r2(recv.reduce((a, e) => a + e.amount, 0));
+  const L = accountLedger('recv', c.from, c.to); const closing = r2(L.open + L.rows.reduce((a, r) => a + r.v, 0));
+  const body = (sells.length ? '<table class="tbl"><thead><tr><th>' + t('date') + '</th><th>' + t('shift') + '</th>' + TH(t('ltr')) + TH(t('fat')) + TH(t('rate')) + TH(t('amount')) + '</tr></thead><tbody>' + rows + '</tbody><tfoot>' +
+      foot('☀️ ' + t('morning') + ' ' + t('total'), st.m) + foot('🌙 ' + t('evening') + ' ' + t('total'), st.e) + foot(t('total'), st.t) + '</tfoot></table>' : empty()) +
+    '<h3>💵 ' + t('received') + '</h3>' + (recv.length ? '<table class="tbl"><tbody>' + recv.map(e => '<tr><td>' + bsLabel(e.date) + '</td><td>' + esc(e.party || e.note || '') + '</td>' + N(money(e.amount, false)) + '</tr>').join('') + '</tbody><tfoot><tr><td colspan="2">' + t('total') + '</td>' + N(money(recvTot, false)) + '</tr></tfoot></table>' : empty()) +
+    '<div class="amtbox"><span>' + accName('recv') + '</span><b>' + money(closing) + '</b></div>';
+  return { title: t('rSales'), html: c.html + repWrap(t('rSales'), bsLabel(c.from) + ' – ' + bsLabel(c.to), body) };
 };
 
 /* ---- cooperative: monthly payment sheet ---- */
@@ -192,7 +215,7 @@ R.ris = q => {
   const sec = (title, list, tot) => '<h3>' + title + '</h3><table class="tbl"><tbody>' + (list.map(([a, v]) => '<tr><td>' + esc(accName(a)) + '</td>' + N(money(v, false)) + '</tr>').join('') || '<tr><td>—</td>' + N('0') + '</tr>') + '</tbody><tfoot><tr><td>' + t('total') + ' ' + title + '</td>' + N(money(tot, false)) + '</tr></tfoot></table>';
   const body = sec(t('income'), F.inc, F.ti) + sec(t('expenses'), F.exp, F.te) +
     '<div class="amtbox ' + (F.profit >= 0 ? 'good' : 'badbg') + '"><span>' + (F.profit >= 0 ? t('netProfit') : t('netLoss')) + '</span><b>' + money(Math.abs(F.profit)) + '</b></div>' +
-    '<p class="help">🥛 ' + t('sold') + ': ' + ltr(lt('sell')) + (isCoop() ? ' · ' + t('collected') + ': ' + ltr(lt('buy')) : '') + '</p>';
+    '<h3>🥛 ' + t('shiftSummary') + '</h3>' + shiftTable(c.s, c.upto);
   return { title: t('rIS'), html: c.html + repWrap(t('rIS'), t('fy') + ' ' + fyLabel(c.fy) + ' · ' + bsLabel(c.s) + ' – ' + bsLabel(c.upto), body) };
 };
 R.rbs = q => {
