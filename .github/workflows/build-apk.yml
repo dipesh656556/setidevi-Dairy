@@ -34,7 +34,7 @@ jobs:
       - name: Create Android project, icons and copy the app in
         run: |
           npx cap add android
-          npx @capacitor/assets generate --android --iconBackgroundColor '#1b7f3b' --splashBackgroundColor '#1b7f3b'
+          npx @capacitor/assets generate --android --iconBackgroundColor '#ffffff' --splashBackgroundColor '#ffffff'
           npx cap sync android
 
       - name: Use the fixed signing key (so updates install over the old app and keep data)

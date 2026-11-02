@@ -17,7 +17,7 @@ function render() {
   const home = p === 'home' || p === 'setup';
   $('#app').innerHTML = (p === 'setup' ? '' :
     '<header class="top"><button class="hb" ' + (home ? 'style="visibility:hidden"' : '') + ' onclick="history.back()" aria-label="' + t('back') + '">←</button>' +
-    '<h1>' + esc(out.title || S.settings.name || t('appName')) + '</h1>' +
+    '<h1>' + (home ? '<img class="hlogo" src="icons/logo.png" alt="">' : '') + esc(out.title || S.settings.name || t('appName')) + '</h1>' +
     (home ? '<button class="hb lang" onclick="toggleLang()">' + (isNe() ? 'EN' : 'ने') + '</button>' : '<button class="hb" onclick="go(\'#/home\')" aria-label="' + t('home') + '">🏠</button>') +
     '</header>') + '<main>' + out.html + '</main>';
   window.scrollTo(0, 0);
@@ -43,7 +43,7 @@ function bindDelete(root, col, id, then) {
 R.setup = () => {
   const st = S.settings;
   return {
-    html: '<div class="setup"><div class="logo">🐄🥛</div><h1>' + t('appName') + '</h1>' +
+    html: '<div class="setup"><div class="logo"><img src="icons/logo.png" alt=""></div><h1>' + t('appName') + '</h1>' +
       '<div class="lb">' + t('chooseLang') + '</div>' +
       choice('lang', [{ v: 'ne', icon: '🇳🇵', label: 'नेपाली' }, { v: 'en', icon: '🔤', label: 'English' }], st.lang, 'two') +
       txtIn('name', t('yourName'), st.name) + rateFields('sell', st) +

@@ -2,7 +2,7 @@
 /* ========== Core: state, storage, formatting, widgets, accounting ========== */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.5.0';
 
 const DEFAULT_STATE = () => ({
   v: 1,

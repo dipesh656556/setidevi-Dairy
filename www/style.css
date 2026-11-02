@@ -111,3 +111,6 @@ select.inp{font-size:1.05rem}
 @media (min-width:600px){.tiles{grid-template-columns:repeat(3,1fr)}.gallery{grid-template-columns:repeat(3,1fr)}}
 @media print{header.top,.ctl,.row2,.btn,#toast{display:none!important}main{padding:0}.report{box-shadow:none;padding:0}body{background:#fff}}
 .rates{background:#f6faf7;box-shadow:none;border:1px solid var(--line);padding:4px 10px 8px}.rates .lb{margin-top:6px}
+.logo img{height:150px;width:auto}
+.hlogo{height:38px;width:38px;object-fit:contain;background:#fff;border-radius:50%;padding:3px;vertical-align:middle;margin-right:8px}
+header.top h1{display:flex;align-items:center;justify-content:center}
