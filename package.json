@@ -1,8 +1,8 @@
 {
   "name": "setidevi-dairy",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
-  "description": "Milk records, Nepali calendar, feed, bills, insurance reminders and accounts for farmers and dairy cooperatives",
+  "description": "Milk records, Nepali calendar, feed, bills, insurance reminders and accounts for dairy farmers",
   "scripts": {
     "android:add": "cap add android",
     "android:sync": "cap sync android"

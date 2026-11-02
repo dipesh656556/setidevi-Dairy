@@ -1,6 +1,6 @@
 # Setidevi Dairy · सेतीदेवी डेरी
 
-An Android app for **dairy farmers** and **milk cooperatives / collection centres** in Nepal.
+An Android app for **dairy farmers** in Nepal: daily milk, animals, feed, sales to the cooperative, bills, insurance and full accounts.
 Works fully **offline**, in **Nepali and English**, with big picture buttons so anyone can use it.
 
 ## Features
@@ -8,17 +8,14 @@ Works fully **offline**, in **Nepali and English**, with big picture buttons so 
 | Area | What it does |
 |---|---|
 | 📅 Nepali calendar | Every date is in Bikram Sambat (BS), with the English date shown under it. Month calendar shows milk liters on each day. Supports BS 2060–2090. |
-| 🥛 Milk (cooperative mode) | Type the farmer number → liters → fat %. Rate and amount are calculated automatically (**rate per liter = fat % × rate per fat**). Morning ☀️ / evening 🌙. "Save & Next" for fast collection. |
-| 🥛 Milk (farmer mode) | Milk from each animal, morning and evening, on one screen. |
-| 🚚 Milk sales | Milk sold to the dairy/cooperative, with fat-based rate, paid now or later (credit). |
-| 🧑‍🌾 Farmers | Farmer list with numbers, phone, village and opening balance. Shows how much is owed to each farmer. |
-| 💵 Farmer payments | Pay a farmer; the amount owed is shown and filled in for you. |
+| 🥛 Daily milk | Milk from each animal, morning and evening, on one screen. |
+| 🚚 Milk sales | Milk sold to the cooperative/dairy: enter liters and fat; the amount is calculated from the rate in Settings (**rate per liter = fat % × rate per fat + morning/evening extra**). Paid now or later (credit). |
 | 🐄 Animals | Cow / buffalo / goat, tag, breed, status (milking/pregnant/dry), photo. |
 | 🌾 Feed | Dana, bhusa, grass, mineral… for one animal or all, with cost, cash/bank/credit and bill photo. |
 | ⬇️⬆️ Money in / out | Big picture buttons: medicine, labour, transport, electricity, loan, interest, animal bought/sold, subsidy, share capital, home use, bank deposit/withdrawal… |
 | 📷 Bill photos | Take a photo of any bill; optionally record it as an expense. All bill photos in one gallery. |
 | 🛡️ Insurance | Policy, company, start/expiry dates (BS), premium, photo of the policy. Red/orange warning on the home screen 30 days before expiry, phone notifications 30, 7 and 1 day before, and a one-tap **Renew**. |
-| 📊 Reports | Daily summary, monthly milk summary, monthly payment sheet (cooperative), farmer statement, milk by animal, feed cost per animal and per liter, cash book, ledger. |
+| 📊 Reports | Daily summary, monthly milk summary, milk by animal, feed cost per animal and per liter, milk money receivable, cash book, ledger. |
 | 📒 Accounts | Real double-entry accounts made automatically from every record: **Trial Balance, Income Statement (Profit & Loss), Balance Sheet** by Nepali fiscal year (Shrawan–Ashadh), with opening balances. |
 | 💾 Backup | Save all data (including photos) to one file and restore it on any phone. |
 | 🔤 Language | Nepali (with Nepali digits) or English, switch any time. |
@@ -43,8 +40,8 @@ Open `www/index.html` from any web server, or turn on GitHub Pages (Settings →
 
 ## First use
 
-1. Pick the language and **Farmer** or **Cooperative**.
-2. Enter the rate per fat (e.g. Rs 15 means 4.5 fat milk = Rs 67.50 per liter). You can change it any time in Settings, and you can type a different rate on any entry.
+1. Pick the language and type your name.
+2. Enter the milk rate: rate per fat (e.g. 14.65) and the morning/evening extra (e.g. +7 / +9). The rate is set only in Settings; change it any time and it applies to new entries from then on.
 3. Settings → **Opening balances**: enter cash, bank, loans etc. on the day you start.
 4. Take a **backup** every week (Settings → Backup) and send the file to yourself on Gmail/Viber.
 
@@ -53,8 +50,8 @@ Open `www/index.html` from any web server, or turn on GitHub Pages (Settings →
 ## नेपालीमा छोटो निर्देशन
 
 - **APK बनाउन:** github.com मा निःशुल्क खाता खोल्नुहोस् → नयाँ repository बनाउनुहोस् → यो फोल्डरका सबै फाइल अपलोड गर्नुहोस् → **Actions** मा हरियो ✔ आएपछि फोनबाट **Releases → latest** खोलेर **SetideviDairy.apk** डाउनलोड गरी इन्स्टल गर्नुहोस्।
-- **सुरुमा:** भाषा र "किसान" वा "सहकारी" छान्नुहोस्, प्रति फ्याट दर लेख्नुहोस्।
-- **दर:** प्रति लिटर दर = फ्याट % × प्रति फ्याट दर।
+- **सुरुमा:** भाषा छान्नुहोस्, नाम र दूधको दर (प्रति फ्याट दर, बिहान/बेलुकाको थप) लेख्नुहोस्। दर सेटिङमा मात्र परिवर्तन हुन्छ।
+- **दर:** प्रति लिटर दर = फ्याट % × प्रति फ्याट दर + बिहान/बेलुकाको थप।
 - **ब्याकअप:** हरेक हप्ता सेटिङ → ब्याकअप गरेर फाइल आफ्नो Gmail/Viber मा पठाउनुहोस्।
 - **बीमा:** म्याद सकिनु ३० दिन अगाडि गृहपृष्ठमा रातो/सुन्तला सूचना आउँछ, फोनमा पनि सम्झाउँछ।
 
