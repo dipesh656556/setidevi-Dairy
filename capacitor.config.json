@@ -1,0 +1,9 @@
+{
+  "appId": "np.setidevi.dairy",
+  "appName": "Setidevi Dairy",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "LocalNotifications": { "iconColor": "#1b7f3b" }
+  }
+}
